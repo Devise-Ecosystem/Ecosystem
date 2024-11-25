@@ -41,11 +41,6 @@ services:
       - "5432:5432"
     networks:
       - frontend
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.plausible.rule=Host(`keycloak.ritik-space.com`)"
-      - "traefik.http.routers.plausible.entrypoints=websecure"
-      - "traefik.http.routers.plausible.tls.certresolver=myresolver"
 
   keycloak:
     depends_on:
@@ -77,6 +72,11 @@ services:
     networks:
       - frontend
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.ritik-space.com`)"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.tls.certresolver=myresolver"
 
   mattermost:
     depends_on:
@@ -95,9 +95,9 @@ services:
       - frontend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.plausible.rule=Host(`chat.ritik-space.com`)"
-      - "traefik.http.routers.plausible.entrypoints=websecure"
-      - "traefik.http.routers.plausible.tls.certresolver=myresolver"
+      - "traefik.http.routers.mattermost.rule=Host(`chat.ritik-space.com`)"
+      - "traefik.http.routers.mattermost.entrypoints=websecure"
+      - "traefik.http.routers.mattermost.tls.certresolver=myresolver"
 
 
 networks:
