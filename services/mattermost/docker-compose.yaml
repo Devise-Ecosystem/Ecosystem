@@ -1,0 +1,14 @@
+services:
+  mattermost:
+    image: mattermost/mattermost-preview
+    container_name: mattermost
+    restart: unless-stopped
+    ports:
+      - "8065:8065"
+    environment:
+      MM_SERVICESETTINGS_SITEURL: http://localhost:8065
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mattermost
+    networks:
+      - frontend

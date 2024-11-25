@@ -1,0 +1,14 @@
+  services:
+    postgres: 
+      image: postgres:17.0
+      environment:
+        POSTGRES_DB: central_db
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin
+      volumes:
+        - ./configs/postgres/init-sql/keycloak.sql:/docker-entrypoint-initdb.d/keycloak.sql
+        - ./configs/postgres/init-sql/mattermost.sql:/docker-entrypoint-initdb.d/mattermost.sql
+      ports:
+        - "5432:5432"
+      networks:
+        - frontend
