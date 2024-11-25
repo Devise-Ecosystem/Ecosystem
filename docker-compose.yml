@@ -13,8 +13,8 @@ services:
       - "--certificatesresolvers.myresolver.acme.email=ritik20199@gmail.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
-      - "80:80"
       - "443:443"
+      - 8080:8080
     volumes:
       - "./letsencrypt:/letsencrypt"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
