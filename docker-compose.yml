@@ -87,7 +87,7 @@ services:
     ports:
       - "8065:8065"
     environment:
-      MM_SERVICESETTINGS_SITEURL: http://localhost:8065
+      MM_SERVICESETTINGS_SITEURL: http://chat.ritik-space.com
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: mattermost
