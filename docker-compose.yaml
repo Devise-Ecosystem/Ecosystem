@@ -1,0 +1,121 @@
+services:
+
+  mattermost:
+    depends_on:
+      - postgres
+    image: mattermost/mattermost-preview
+    container_name: mattermost
+    restart: unless-stopped
+    ports:
+      - "8065:8065"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mattermost
+      MM_SQLSETTINGS_DRIVERNAME: postgres
+      MM_SQLSETTINGS_DATASOURCE: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_MATTERMOST_DB}?sslmode=disable&connect_timeout=10
+      MM_SERVICESETTINGS_SITEURL: hittp://localhost:8065
+    networks:
+      - frontend
+
+  postgres: 
+    image: postgres:17.0
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./configs/postgres/init-sql/keycloak.sql:/docker-entrypoint-initdb.d/keycloak.sql
+      - ./configs/postgres/init-sql/mattermost.sql:/docker-entrypoint-initdb.d/mattermost.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - frontend
+
+  # traefik:
+  #   image: traefik:v3.1
+  #   container_name: traefik
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #     - 8080:8080
+  #   command:
+  #     - "--providers.docker=true"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--log.level=DEBUG"
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"  # Allow Traefik to communicate with Docker
+  #   restart: unless-stopped
+  #   networks:
+  #     - frontend
+
+  # keycloak:
+  #   depends_on:
+  #     - postgres
+  #   image: quay.io/keycloak/keycloak:24.0
+  #   environment:
+  #     KC_HOSTNAME: localhost
+  #     KC_HOSTNAME_PORT: 7080
+  #     KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
+  #     KEYCLOAK_ADMIN: admin
+  #     KEYCLOAK_ADMIN_PASSWORD: admin
+  #     KC_DB: postgres
+  #     KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+  #     KC_DB_USERNAME: admin
+  #     KC_DB_PASSWORD: admin
+  #     KC_HEALTH_ENABLED: "true"
+  #     KC_LOG_LEVEL: info
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:7080/health/ready"]
+  #     interval: 15s
+  #     timeout: 2s
+  #     retries: 15
+  #   command: ["start-dev", "--http-port", "7080", "--https-port", "7443", "--import-realm"]
+  #   volumes: # Ignore if you don't have realm-export.json to migrate data
+  #     - ../keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+  #   ports:
+  #     - "7080:7080"
+  #     - "7443:7443"
+  #   networks:
+  #     - frontend
+  #   restart: always
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.keycloak.rule=Host(`keycloak.ritik-space.com`)"
+  #     - "traefik.http.routers.keycloak.entrypoints=websecure"
+  #     - "traefik.http.routers.keycloak.tls.certresolver=myresolver"
+
+
+  # traefik:
+  #   image: "traefik:latest"
+  #   container_name: "traefik"
+  #   command:
+  #     - "--api.dashboard=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+  #     - "--certificatesresolvers.myresolver.acme.email=ritik20199@gmail.com"
+  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - 8080:8080
+  #   volumes:
+  #     - "./letsencrypt:/letsencrypt"
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.traefik.rule=Host(`traefik.ritik-space.com`)"
+  #     - "traefik.http.routers.traefik.entrypoints=websecure"
+  #     - "traefik.http.routers.traefik.service=api@internal"
+  #     - "traefik.http.routers.traefik.tls.certresolver=myresolver"      
+  #     - "traefik.http.routers.traefik.middlewares=traefik-auth"
+  #     - "traefik.http.middlewares.traefik-auth.basicauth.users=user:$$2y$$05$$6m8MvyzgJ4Kl7/3rL4X6VurX1huMas8a7oPB3xRfBjFbGCR8MUi7W"
+
+
+networks:
+  frontend:
+    driver: bridge
